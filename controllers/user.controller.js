@@ -1,5 +1,8 @@
 import { Auth } from "../models/user.model.js";
-import { uploadToCloudinary } from "../utils/cloudinary.js";
+import {
+  deleteFileInCloudinary,
+  uploadToCloudinary,
+} from "../utils/cloudinary.js";
 
 const generateAccessAndRefreshTokens = async (id) => {
   try {
@@ -63,7 +66,6 @@ const registration = async (req, res) => {
       ...(authRole === "user" && { cartItems: [] }),
     });
 
-    console.log(newUser);
     const filtered = await Auth.findById(newUser?._id).select(
       "-password -refreshToken"
     );
@@ -233,7 +235,7 @@ const createAuthUser = async (req, res) => {
         url: imageResponse?.secure_url,
         publicId: imageResponse?.public_id,
       },
-       ...(authRole === "user" && { cartItems: [] }),
+      ...(authRole === "user" && { cartItems: [] }),
     });
 
     const filtered = await Auth.findById(newUser?._id).select(
@@ -255,4 +257,139 @@ const createAuthUser = async (req, res) => {
   }
 };
 
-export { registration, login, logout, createAuthUser };
+const deleteProfileImage = async (req, res) => {
+  try {
+    const { publicId } = req.body;
+
+    if (!publicId) {
+      return res.status(422).json({
+        success: false,
+        statusCode: 422,
+        message: "public id is missing",
+      });
+    }
+
+    const deleteImage = await deleteFileInCloudinary(publicId);
+    const result = deleteImage?.result?.toLowerCase?.();
+
+    if (result === "not found") {
+      return res.status(404).json({
+        success: false,
+        statusCode: 404,
+        message: "Not found",
+      });
+    }
+
+    res.status(209).json({
+      success: true,
+      statusCode: 200,
+      message: "Image deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      statusCode: 500,
+      message: error.message || "Internal Server Error",
+    });
+  }
+};
+
+const updateProfileDetails = async (req, res) => {
+  try {
+    const { username } = req.body;
+
+    const existingUser = await Auth.findById(req.user?._id);
+
+    if (!existingUser) {
+      return res.status(404).json({
+        success: false,
+        statusCode: 404,
+        message: "User not found",
+      });
+    }
+
+    const localFilePath = req?.file?.path;
+
+    let imageResponse;
+
+    if (localFilePath) {
+      imageResponse = await uploadToCloudinary(localFilePath);
+    }
+
+    if (username) {
+      existingUser.username = username;
+    }
+
+    if (imageResponse?.secure_url && imageResponse?.public_id) {
+      existingUser.image = {
+        url: imageResponse.secure_url,
+        publicId: imageResponse.public_id,
+      };
+    }
+    await existingUser.save();
+
+    const updatedUser = await Auth.findById(existingUser?._id).select(
+      "-password -refreshToken"
+    );
+
+    res.status(200).json({
+      success: true,
+      statusCode: 200,
+      message: "Profile updated successfully",
+      data: updatedUser,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      statusCode: 500,
+      message: error.message || "Internal Server Error",
+    });
+  }
+};
+
+const deleteAccount = async (req, res) => {
+  try {
+    const existingUser = await Auth.findById(req.user?._id);
+
+    if (!existingUser) {
+      return res.status(404).json({
+        success: false,
+        statusCode: 404,
+        message: "User not found",
+      });
+    }
+
+    if (existingUser?.image?.publicId) {
+      await deleteFileInCloudinary(existingUser.image.publicId);
+    }
+  
+    existingUser.refreshToken = null;
+    await existingUser.save()
+
+    const deletedUser = await Auth.findByIdAndDelete(existingUser?._id);
+
+    res.status(200).json({
+      success : true,
+      statusCode : 200,
+      message : "user account deleted successfully",
+      data : deletedUser
+    })
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      statusCode: 500,
+      message: error.message || "Internal Server Error",
+    });
+  }
+};
+
+export {
+  registration,
+  login,
+  logout,
+  createAuthUser,
+  deleteProfileImage,
+  updateProfileDetails,
+  deleteAccount
+};
