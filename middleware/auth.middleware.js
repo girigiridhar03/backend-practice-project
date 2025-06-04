@@ -42,7 +42,7 @@ const authMiddleware = async (req, res, next) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      statusCode : 500,
+      statusCode: 500,
       message: `Invalid token : ${error}`,
     });
   }

@@ -8,12 +8,11 @@ const generateAccessAndRefreshTokens = async (id) => {
   try {
     const user = await Auth.findById(id);
 
-    const accessToken = user.generateAccessToken();
     const refreshToken = user.generateRefreshToken();
-
     user.refreshToken = refreshToken;
 
     await user.save();
+    const accessToken = user.generateAccessToken();
 
     return { accessToken, refreshToken };
   } catch (error) {
@@ -362,19 +361,18 @@ const deleteAccount = async (req, res) => {
     if (existingUser?.image?.publicId) {
       await deleteFileInCloudinary(existingUser.image.publicId);
     }
-  
+
     existingUser.refreshToken = null;
-    await existingUser.save()
+    await existingUser.save();
 
     const deletedUser = await Auth.findByIdAndDelete(existingUser?._id);
 
     res.status(200).json({
-      success : true,
-      statusCode : 200,
-      message : "user account deleted successfully",
-      data : deletedUser
-    })
-
+      success: true,
+      statusCode: 200,
+      message: "user account deleted successfully",
+      data: deletedUser,
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -391,5 +389,5 @@ export {
   createAuthUser,
   deleteProfileImage,
   updateProfileDetails,
-  deleteAccount
+  deleteAccount,
 };

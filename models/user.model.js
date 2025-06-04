@@ -32,9 +32,33 @@ const authSchema = new mongoose.Schema(
             required: true,
             default: 1,
           },
+          name: {
+            type: String,
+          },
+          productImages: [
+            {
+              url: {
+                type: String,
+              },
+              publicId: {
+                type: String,
+              },
+            },
+          ],
+          rating: {
+            type: Number,
+          },
+          description: {
+            type: String,
+          },
+          color: {
+            type: String,
+          },
+          variant: {
+            type: String,
+          },
           price: {
             type: Number,
-            required: true,
           },
         },
       ],
