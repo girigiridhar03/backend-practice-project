@@ -344,11 +344,225 @@ const deleteCartItem = async (req, res) => {
   }
 };
 
+const getAllProducts = async (req, res) => {
+  try {
+    const { name, brand, category } = req.query;
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+    const skip = (page - 1) * limit;
+    const sortBy = req.query.sortBy || "createdAt";
+    const sortOrder = req.query.sortOrder === "asc" ? 1 : -1;
+    const totalProducts = await Product.countDocuments();
+    const totalPages = Math.ceil(totalProducts / limit);
+
+    const query = {};
+
+    if (name) {
+      query.name = { $regex: name, $options: "i" };
+    }
+
+    if (brand) {
+      query.brand = { $regex: brand, $options: "i" };
+    }
+
+    if (category) {
+      query.category = { $regex: category, $options: "i" };
+    }
+
+    let allProducts = await Product.find(query)
+      .sort({ [sortBy]: sortOrder })
+      .skip(skip)
+      .limit(limit);
+
+    res.status(200).json({
+      success: true,
+      statusCode: 200,
+      message: "All product retrived successfully",
+      data: allProducts,
+      currentPage: page,
+      totalProducts,
+      totalPages,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      statusCode: 500,
+      message: error.message || "Internal Server Error",
+    });
+  }
+};
+
+const getSingleProduct = async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({
+        success: false,
+        statusCode: 400,
+        message: `Invalid Product ID : ${productId}`,
+      });
+    }
+
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        statusCode: 404,
+        message: "Product not found.",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      statusCode: 200,
+      message: `${productId} is retrived`,
+      data: product,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      statusCode: 500,
+      message: error.message || "Internal Server Error",
+    });
+  }
+};
+
+const addComments = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const { userId, comment } = req.body;
+
+    if (!userId || !comment?.trim()) {
+      return res.status(400).json({
+        success: false,
+        statusCode: 400,
+        message: "All fields are required",
+      });
+    }
+
+    if (
+      !mongoose.Types.ObjectId.isValid(productId) ||
+      !mongoose.Types.ObjectId.isValid(userId)
+    ) {
+      return res.status(400).json({
+        success: false,
+        statusCode: 400,
+        message: "Invalid productId or userId",
+      });
+    }
+
+    const existingUser = await Auth.findById(userId);
+
+    if (!existingUser) {
+      return res.status(404).json({
+        success: false,
+        statusCode: 404,
+        message: "user not found",
+      });
+    }
+
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        statusCode: 404,
+        message: "product not found",
+      });
+    }
+
+    product.comments.push({
+      user: userId,
+      name: existingUser?.username,
+      comment,
+    });
+
+    await product.save();
+
+    res.status(200).json({
+      success: true,
+      statusCode: 200,
+      message: "Comment added successfully",
+      comments: product.comments.trim(),
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      statusCode: 500,
+      message: error.message || "Internal Server Error",
+    });
+  }
+};
+
+const deleteComment = async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    const userid = req.user?._id;
+
+    if (
+      !mongoose.Types.ObjectId.isValid(productId) ||
+      !mongoose.Types.ObjectId.isValid(userid)
+    ) {
+      return res.status(400).json({
+        success: false,
+        statusCode: 400,
+        message: "Product id or user id is invalid",
+      });
+    }
+
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        statusCode: 404,
+        message: "Product is not found",
+      });
+    }
+
+    const beforeCountLength = product.comments.length;
+
+    product.comments = product.comments.filter(
+      (item) => item.user.toString() !== userid
+    );
+
+    if (beforeCountLength === product.comments.length) {
+      return res.status(404).json({
+        success: false,
+        statusCode: 404,
+        message: "Comment not found or already deleted",
+      });
+    }
+
+    await product.save();
+
+    res.status(200).json({
+      success: true,
+      statusCode: 200,
+      message: "Comment remove successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      statusCode: 500,
+      message: error.message || "Internal Server Error",
+    });
+  }
+};
+
 export {
   addProduct,
+  getAllProducts,
+  getSingleProduct,
   editProduct,
   deleteProduct,
   addToCart,
   getCartDetails,
   deleteCartItem,
+  addComments,
+  deleteComment,
 };

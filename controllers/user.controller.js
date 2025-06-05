@@ -1,3 +1,4 @@
+import Product from "../models/product.model.js";
 import { Auth } from "../models/user.model.js";
 import {
   deleteFileInCloudinary,
@@ -366,6 +367,8 @@ const deleteAccount = async (req, res) => {
     await existingUser.save();
 
     const deletedUser = await Auth.findByIdAndDelete(existingUser?._id);
+
+    await Product.updateMany({}, { $pull: { comments: { user: user?.id } } });
 
     res.status(200).json({
       success: true,

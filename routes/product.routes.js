@@ -3,12 +3,16 @@ import { upload } from "../middleware/multer.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 import isAdmin from "../middleware/isAdmin.middleware.js";
 import {
+  addComments,
   addProduct,
   addToCart,
   deleteCartItem,
+  deleteComment,
   deleteProduct,
   editProduct,
+  getAllProducts,
   getCartDetails,
+  getSingleProduct,
 } from "../controllers/product.controller.js";
 
 const productroute = express.Router();
@@ -33,8 +37,20 @@ productroute.delete(
   isAdmin,
   deleteProduct
 );
+productroute.get("/getallproducts", authMiddleware, getAllProducts);
+productroute.get(
+  "/getSingleProduct/:productId",
+  authMiddleware,
+  getSingleProduct
+);
 productroute.post("/addtocart", authMiddleware, addToCart);
 productroute.get("/getcartdetails", authMiddleware, getCartDetails);
-productroute.delete("/deletecartitem/:productId", authMiddleware, deleteCartItem);
+productroute.delete(
+  "/deletecartitem/:productId",
+  authMiddleware,
+  deleteCartItem
+);
+productroute.post("/addcomments/:productId", authMiddleware, addComments);
+productroute.delete("/deletecomment/:productId", authMiddleware, deleteComment);
 
 export default productroute;
