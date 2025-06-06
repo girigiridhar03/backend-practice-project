@@ -129,6 +129,7 @@ const login = async (req, res) => {
       httpOnly: true,
       secure: true,
       sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     };
 
     res
@@ -141,7 +142,6 @@ const login = async (req, res) => {
         message: "User logged in successfully",
         data: loggedInUser,
         accessToken,
-        refreshToken,
       });
   } catch (error) {
     res.status(500).json({

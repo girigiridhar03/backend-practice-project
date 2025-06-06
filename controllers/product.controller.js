@@ -347,6 +347,7 @@ const deleteCartItem = async (req, res) => {
 const getAllProducts = async (req, res) => {
   try {
     const { name, brand, category } = req.query;
+    const userid = req.user?._id;
 
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 5;
@@ -373,7 +374,21 @@ const getAllProducts = async (req, res) => {
     let allProducts = await Product.find(query)
       .sort({ [sortBy]: sortOrder })
       .skip(skip)
-      .limit(limit);
+      .limit(limit)
+      .lean();
+
+    allProducts = allProducts.map((product)=>{
+       if(product.comments && Array.isArray(product.comments)){
+         product.comments = product.comments.map((item)=>{
+          return {
+            ...item,
+            isDelete : item.user.toString() === userid.toString(),
+          }
+         })
+       }
+       return product
+    })
+
 
     res.status(200).json({
       success: true,
