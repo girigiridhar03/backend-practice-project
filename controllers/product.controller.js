@@ -271,9 +271,9 @@ const getCartDetails = async (req, res) => {
     const cartItems = exisingUser.cartItems;
 
     if (cartItems.length === 0) {
-      return res.status(400).json({
+      return res.status(200).json({
         success: false,
-        statusCode: 400,
+        statusCode: 200,
         message: "Cart is empty",
       });
     }
