@@ -7,23 +7,23 @@ const orderSchema = new mongoose.Schema(
         productId: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Product",
-          required : true
+          required: true,
         },
 
         quantity: {
           type: Number,
           required: true,
         },
-        priceAtPurchase : {
-            type : Number,
-            required : true,
-        }
+        priceAtPurchase: {
+          type: Number,
+          required: true,
+        },
       },
     ],
     userid: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Auth",
-      required : true
+      required: true,
     },
     totalPrice: {
       type: Number,
@@ -48,9 +48,23 @@ const orderSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "processing", "out for delivery", "delivered", "cancelled"],
+      enum: [
+        "pending",
+        "processing",
+        "out for delivery",
+        "delivered",
+        "cancelled",
+      ],
       default: "pending",
     },
+    deliveryAgent: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Auth",
+    },
+    isAssign : {
+      type : Boolean,
+      default : false
+    }
   },
   {
     timestamps: true,

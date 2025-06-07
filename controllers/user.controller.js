@@ -385,6 +385,42 @@ const deleteAccount = async (req, res) => {
   }
 };
 
+const getallUsersAndAgents = async (req, res) => {
+  try {
+    const { filterAuth } = req.query;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+    const skip = (page - 1) * limit;
+
+    const query = {};
+
+    if (filterAuth) {
+      query.role = filterAuth;
+    }
+    const totalAuthUsers = await Auth.countDocuments(query);
+    const totalPages = Math.ceil(totalAuthUsers / limit);
+
+    const allAuthUsers = await Auth.find(query).skip(skip).limit(limit);
+
+    res.status(200).json({
+      success: false,
+      statusCode: 200,
+      message: "All Auth users are retrived.",
+      data: allAuthUsers,
+      currentPage: page,
+      totalAuthUsers,
+      totalPages,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      statusCode: 500,
+      message: error.message || "Internal Server Error",
+    });
+  }
+};
+
+
 export {
   registration,
   login,
@@ -393,4 +429,5 @@ export {
   deleteProfileImage,
   updateProfileDetails,
   deleteAccount,
+  getallUsersAndAgents,
 };

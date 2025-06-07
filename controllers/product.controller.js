@@ -226,7 +226,7 @@ const addToCart = async (req, res) => {
     if (existingItem) {
       existingItem.quantity += Number(quantity);
     } else {
-      user.cartItems.push({
+      user.cartItems?.push({
         productId,
         quantity,
         price: product?.price,
@@ -270,15 +270,15 @@ const getCartDetails = async (req, res) => {
 
     const cartItems = exisingUser.cartItems;
 
-    if (cartItems.length === 0) {
+    if (cartItems?.length === 0) {
       return res.status(200).json({
-        success: false,
+        success: true,
         statusCode: 200,
         message: "Cart is empty",
       });
     }
 
-    const cartTotal = cartItems.reduce(
+    const cartTotal = cartItems?.reduce(
       (acc, curr) => acc + curr.price * curr.quantity,
       0
     );
