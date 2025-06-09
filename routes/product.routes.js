@@ -12,6 +12,7 @@ import {
   editProduct,
   getAllProducts,
   getCartDetails,
+  getCategoriesAndCount,
   getSingleProduct,
 } from "../controllers/product.controller.js";
 
@@ -52,5 +53,6 @@ productroute.delete(
 );
 productroute.post("/addcomments/:productId", authMiddleware, addComments);
 productroute.delete("/deletecomment/:productId", authMiddleware, deleteComment);
+productroute.get("/getcategories", authMiddleware, getCategoriesAndCount);
 
 export default productroute;

@@ -15,6 +15,7 @@ const addProduct = async (req, res) => {
       stock,
       variant,
       color,
+      section,
     } = req.body;
 
     if (
@@ -25,7 +26,8 @@ const addProduct = async (req, res) => {
       !brand ||
       !category ||
       !stock ||
-      !color
+      !color ||
+      !section
     ) {
       return res.status(400).json({
         success: false,
@@ -67,6 +69,7 @@ const addProduct = async (req, res) => {
       stock,
       variant,
       color,
+      section,
       productImages: imageUploadResult?.map((img) => ({
         url: img.url,
         publicId: img.public_id,
@@ -113,6 +116,7 @@ const editProduct = async (req, res) => {
       stock,
       variant,
       color,
+      section,
     } = req.body;
 
     const files = req.files;
@@ -142,6 +146,7 @@ const editProduct = async (req, res) => {
         stock: stock || product?.stock,
         variant: variant || product?.variant,
         color: color || product?.color,
+        section: section || product?.section,
         productImages,
       },
       { new: true }
@@ -346,7 +351,7 @@ const deleteCartItem = async (req, res) => {
 
 const getAllProducts = async (req, res) => {
   try {
-    const { name, brand, category } = req.query;
+    const { name, brand, category, section } = req.query;
     const userid = req.user?._id;
 
     const page = parseInt(req.query.page) || 1;
@@ -358,6 +363,10 @@ const getAllProducts = async (req, res) => {
     const totalPages = Math.ceil(totalProducts / limit);
 
     const query = {};
+
+    if (section) {
+      query.section = { $regex: section, $options: "i" };
+    }
 
     if (name) {
       query.name = { $regex: name, $options: "i" };
@@ -377,18 +386,17 @@ const getAllProducts = async (req, res) => {
       .limit(limit)
       .lean();
 
-    allProducts = allProducts.map((product)=>{
-       if(product.comments && Array.isArray(product.comments)){
-         product.comments = product.comments.map((item)=>{
+    allProducts = allProducts.map((product) => {
+      if (product.comments && Array.isArray(product.comments)) {
+        product.comments = product.comments.map((item) => {
           return {
             ...item,
-            isDelete : item.user.toString() === userid.toString(),
-          }
-         })
-       }
-       return product
-    })
-
+            isDelete: item.user.toString() === userid.toString(),
+          };
+        });
+      }
+      return product;
+    });
 
     res.status(200).json({
       success: true,
@@ -569,6 +577,48 @@ const deleteComment = async (req, res) => {
   }
 };
 
+const getCategoriesAndCount = async (req, res) => {
+  try {
+    const { section } = req.query;
+
+
+    const allProductsCategories = await Product.aggregate([
+      {
+        $match: {
+          section: section,
+        },
+      },
+      {
+        $group: {
+          _id: "$category",
+          totalProducts: {
+            $sum: 1,
+          },
+        },
+      },
+      {
+        $project: {
+          category: "$_id",
+          totalProducts: 1,
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      success: true,
+      statusCode: 200,
+      message: "All categories retrieved.",
+      data: allProductsCategories,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      statusCode: 500,
+      message: error.message || "Internal Server Error",
+    });
+  }
+};
+
 export {
   addProduct,
   getAllProducts,
@@ -580,4 +630,5 @@ export {
   deleteCartItem,
   addComments,
   deleteComment,
+  getCategoriesAndCount,
 };
