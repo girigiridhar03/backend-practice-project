@@ -581,7 +581,6 @@ const getCategoriesAndCount = async (req, res) => {
   try {
     const { section } = req.query;
 
-
     const allProductsCategories = await Product.aggregate([
       {
         $match: {
@@ -600,6 +599,11 @@ const getCategoriesAndCount = async (req, res) => {
         $project: {
           category: "$_id",
           totalProducts: 1,
+        },
+      },
+      {
+        $sort: {
+          category: 1,
         },
       },
     ]);

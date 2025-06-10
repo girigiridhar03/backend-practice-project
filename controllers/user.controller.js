@@ -1,5 +1,6 @@
 import Product from "../models/product.model.js";
 import { Auth } from "../models/user.model.js";
+import jwt from "jsonwebtoken";
 import {
   deleteFileInCloudinary,
   uploadToCloudinary,
@@ -420,6 +421,47 @@ const getallUsersAndAgents = async (req, res) => {
   }
 };
 
+const generateNewAccessToken = async (req, res) => {
+  try {
+    const refreshToken = req.cookies?.refreshToken || req.body.refreshToken;
+
+    if (!refreshToken) {
+      return res.status(401).json({
+        success: false,
+        message: "Refresh token missing",
+      });
+    }
+
+    let decode;
+
+    try {
+      decode = jwt.verify(refreshToken, process.env.REFRESHTOKEN_JWT_KEY);
+    } catch (error) {
+      return res.status(401).json({
+        success: false,
+        statusCode: 401,
+        message: "Invalid or expired token",
+      });
+    }
+
+    const user = await Auth.findById(decode?._id);
+
+    const newAccessToken = user.generateAccessToken();
+
+    res.status(200).json({
+      success: true,
+      statusCode: 200,
+      message: "new access token generated",
+      accessToken: newAccessToken,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      statusCode: 500,
+      message: error.message || "Internal Server Error",
+    });
+  }
+};
 
 export {
   registration,
@@ -430,4 +472,5 @@ export {
   updateProfileDetails,
   deleteAccount,
   getallUsersAndAgents,
+  generateNewAccessToken,
 };

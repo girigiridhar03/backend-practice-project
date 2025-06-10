@@ -4,6 +4,7 @@ import {
   createAuthUser,
   deleteAccount,
   deleteProfileImage,
+  generateNewAccessToken,
   getallUsersAndAgents,
   login,
   logout,
@@ -39,5 +40,6 @@ userroute.get(
   isAdmin,
   getallUsersAndAgents
 );
+userroute.get("/refreshToken", authMiddleware, generateNewAccessToken);
 
 export default userroute;
