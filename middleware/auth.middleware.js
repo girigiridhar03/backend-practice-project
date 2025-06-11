@@ -6,25 +6,15 @@ const authMiddleware = async (req, res, next) => {
     req.cookies?.accessToken ||
     req.header("Authorization")?.replace("Bearer ", "");
 
+  if (!token) {
+    return res.status(401).json({
+      success: false,
+      statusCode: 401,
+      message: "Unauthorized: No token provided",
+    });
+  }
   try {
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        statusCode: 401,
-        message: "Unauthorized: No token provided",
-      });
-    }
-
-    let decoded;
-    try {
-      decoded = jwt.verify(token, process.env.ACCESSTOKEN_JWT_KEY);
-    } catch (err) {
-      return res.status(401).json({
-        success: false,
-        statusCode: 401,
-        message: "Invalid or expired token",
-      });
-    }
+    let decoded = jwt.verify(token, process.env.ACCESSTOKEN_JWT_KEY);
 
     const user = await Auth.findById(decoded?._id);
 
@@ -39,11 +29,21 @@ const authMiddleware = async (req, res, next) => {
     req.user = user;
 
     next();
-  } catch (error) {
-    res.status(500).json({
+  } catch (err) {
+    let errorMessage = "Invalid or expired token";
+
+    if (err.name === "TokenExpiredError") {
+      errorMessage = "jwt expired";
+    } else if (err.name === "JsonWebTokenError") {
+      errorMessage = "invalid token";
+    } else if (err.name === "NotBeforeError") {
+      errorMessage = "jwt not active";
+    }
+
+    return res.status(401).json({
       success: false,
-      statusCode: 500,
-      message: `Invalid token : ${error}`,
+      statusCode: 401,
+      message: errorMessage,
     });
   }
 };

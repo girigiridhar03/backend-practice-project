@@ -419,7 +419,7 @@ const getAllProducts = async (req, res) => {
 const getSingleProduct = async (req, res) => {
   try {
     const { productId } = req.params;
-
+    const userid = req.user?._id;
     if (!mongoose.Types.ObjectId.isValid(productId)) {
       return res.status(400).json({
         success: false,
@@ -430,6 +430,7 @@ const getSingleProduct = async (req, res) => {
 
     const product = await Product.findById(productId);
 
+
     if (!product) {
       return res.status(404).json({
         success: false,
@@ -437,12 +438,17 @@ const getSingleProduct = async (req, res) => {
         message: "Product not found.",
       });
     }
+    const productObj = product.toObject();
 
+    productObj.comments = productObj.comments.map((item) => ({
+      ...item,
+      isDelete: item.user.toString() === userid?.toString(),
+    }));
     res.status(200).json({
       success: true,
       statusCode: 200,
       message: `${productId} is retrived`,
-      data: product,
+      data: productObj,
     });
   } catch (error) {
     res.status(500).json({
@@ -456,7 +462,8 @@ const getSingleProduct = async (req, res) => {
 const addComments = async (req, res) => {
   try {
     const { productId } = req.params;
-    const { userId, comment } = req.body;
+    const { comment } = req.body;
+    const userId = req.user?._id;
 
     if (!userId || !comment?.trim()) {
       return res.status(400).json({
@@ -509,7 +516,7 @@ const addComments = async (req, res) => {
       success: true,
       statusCode: 200,
       message: "Comment added successfully",
-      comments: product.comments.trim(),
+      comments: product.comments,
     });
   } catch (error) {
     res.status(500).json({
@@ -623,6 +630,52 @@ const getCategoriesAndCount = async (req, res) => {
   }
 };
 
+const getProductsByGroupId = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+
+    if (!groupId) {
+      return res.status(401).json({
+        success: false,
+        statusCode: 401,
+        message: "Group id is required",
+      });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(!groupId)) {
+      return res.status(422).json({
+        success: false,
+        statusCode: 422,
+        message: `Invalid group id : ${groupId}`,
+      });
+    }
+
+    const productsByGroupId = await Product.find({ groupId });
+
+    if (productsByGroupId?.length === 0) {
+      return res.status.json({
+        success: true,
+        statusCode: 200,
+        message: "No items found with groupid.",
+        data: productsByGroupId,
+      });
+    }
+
+    res.status.json({
+      success: true,
+      statusCode: 200,
+      message: "Producst retrived successfully.",
+      data: productsByGroupId,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      statusCode: 500,
+      message: error.message || "Internal Server Error",
+    });
+  }
+};
+
 export {
   addProduct,
   getAllProducts,
@@ -635,4 +688,5 @@ export {
   addComments,
   deleteComment,
   getCategoriesAndCount,
+  getProductsByGroupId,
 };

@@ -13,6 +13,7 @@ import {
   getAllProducts,
   getCartDetails,
   getCategoriesAndCount,
+  getProductsByGroupId,
   getSingleProduct,
 } from "../controllers/product.controller.js";
 
@@ -54,5 +55,10 @@ productroute.delete(
 productroute.post("/addcomments/:productId", authMiddleware, addComments);
 productroute.delete("/deletecomment/:productId", authMiddleware, deleteComment);
 productroute.get("/getcategories", authMiddleware, getCategoriesAndCount);
+productroute.get(
+  "/getProductsByGroupId/:groupId",
+  authMiddleware,
+  getProductsByGroupId
+);
 
 export default productroute;
