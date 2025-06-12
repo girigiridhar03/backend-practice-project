@@ -66,6 +66,9 @@ const productSchema = new mongoose.Schema(
         comment: {
           type: String,
         },
+        userimage : {
+          type : String
+        },
         date: {
           type: Date,
           default: Date.now,

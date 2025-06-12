@@ -429,8 +429,7 @@ const getSingleProduct = async (req, res) => {
     }
 
     const product = await Product.findById(productId);
-
-
+  
     if (!product) {
       return res.status(404).json({
         success: false,
@@ -439,6 +438,7 @@ const getSingleProduct = async (req, res) => {
       });
     }
     const productObj = product.toObject();
+    productObj.comments.sort((a, b) => new Date(b.date) - new Date(a.date));
 
     productObj.comments = productObj.comments.map((item) => ({
       ...item,
@@ -507,6 +507,7 @@ const addComments = async (req, res) => {
     product.comments.push({
       user: userId,
       name: existingUser?.username,
+      userimage: existingUser?.image?.url,
       comment,
     });
 
