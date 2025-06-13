@@ -429,7 +429,7 @@ const getSingleProduct = async (req, res) => {
     }
 
     const product = await Product.findById(productId);
-  
+
     if (!product) {
       return res.status(404).json({
         success: false,
@@ -530,7 +530,7 @@ const addComments = async (req, res) => {
 
 const deleteComment = async (req, res) => {
   try {
-    const { productId } = req.params;
+    const { productId, commentId } = req.params;
 
     const userid = req.user?._id;
 
@@ -558,7 +558,7 @@ const deleteComment = async (req, res) => {
     const beforeCountLength = product.comments.length;
 
     product.comments = product.comments.filter(
-      (item) => item.user.toString() !== userid
+      (item) => item._id.toString() !== commentId?.toString()
     );
 
     if (beforeCountLength === product.comments.length) {
