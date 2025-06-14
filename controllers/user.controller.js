@@ -448,8 +448,17 @@ const generateNewAccessToken = async (req, res) => {
     const user = await Auth.findById(decode?._id);
 
     const newAccessToken = user.generateAccessToken();
+    const options = {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    };
 
-    res.status(200).json({
+    res.status(200)
+    .cookie("accessToken", newAccessToken, options)
+    .json({
       success: true,
       statusCode: 200,
       message: "new access token generated",
