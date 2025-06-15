@@ -692,7 +692,7 @@ const getProductsByGroupId = async (req, res) => {
       });
     }
 
-    if (!mongoose.Types.ObjectId.isValid(!groupId)) {
+    if (!mongoose.Types.ObjectId.isValid(groupId)) {
       return res.status(422).json({
         success: false,
         statusCode: 422,
@@ -703,7 +703,7 @@ const getProductsByGroupId = async (req, res) => {
     const productsByGroupId = await Product.find({ groupId });
 
     if (productsByGroupId?.length === 0) {
-      return res.status.json({
+      return res.status(200).json({
         success: true,
         statusCode: 200,
         message: "No items found with groupid.",
@@ -711,7 +711,7 @@ const getProductsByGroupId = async (req, res) => {
       });
     }
 
-    res.status.json({
+    res.status(200).json({
       success: true,
       statusCode: 200,
       message: "Producst retrived successfully.",
