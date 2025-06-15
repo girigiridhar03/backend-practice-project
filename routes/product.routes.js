@@ -15,6 +15,7 @@ import {
   getCategoriesAndCount,
   getProductsByGroupId,
   getSingleProduct,
+  updateCart,
 } from "../controllers/product.controller.js";
 
 const productroute = express.Router();
@@ -46,6 +47,7 @@ productroute.get(
   getSingleProduct
 );
 productroute.post("/addtocart", authMiddleware, addToCart);
+productroute.post("/updateCart", authMiddleware, updateCart);
 productroute.get("/getcartdetails", authMiddleware, getCartDetails);
 productroute.delete(
   "/deletecartitem/:productId",

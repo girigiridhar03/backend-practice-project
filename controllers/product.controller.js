@@ -267,6 +267,55 @@ const addToCart = async (req, res) => {
   }
 };
 
+const updateCart = async (req, res) => {
+  try {
+    const userid = req.user?._id;
+
+    const { productId, quantity } = req.body;
+    if (!productId || typeof quantity !== "number" || quantity <= 0) {
+      return res.status(400).json({
+        success: false,
+        statusCode: 400,
+        message: "Product ID and valid quantity are required",
+      });
+    }
+
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        statusCode: 404,
+        message: "Product not found",
+      });
+    }
+
+    const user = await Auth.findById(userid);
+
+    const existingItem = user?.cartItems?.find(
+      (item) => item?.productId?.toString() === productId
+    );
+
+    existingItem.quantity = quantity;
+
+    user.cartItems = user.cartItems.map((item)=> item?.productId.toString() === productId ? existingItem : item);
+
+    await user.save();
+    res.status(200).json({
+      success : true,
+      statusCode : 200,
+      message : "Cart Updated",
+      data : user.cartItems
+    })
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      statusCode: 500,
+      message: error.message || "Internal Server Error",
+    });
+  }
+};
+
 const getCartDetails = async (req, res) => {
   try {
     const userid = req.user?._id;
@@ -684,6 +733,7 @@ export {
   editProduct,
   deleteProduct,
   addToCart,
+  updateCart,
   getCartDetails,
   deleteCartItem,
   addComments,
