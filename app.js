@@ -31,9 +31,11 @@ app.use(express.static("public"));
 import userroute from "./routes/user.routes.js";
 import productroute from "./routes/product.routes.js";
 import orderRoute from "./routes/order.routes.js";
+import dashboardRoute from "./routes/dashboard.route.js";
 
 app.use("/auth", userroute);
 app.use("/store", productroute);
 app.use("/order", orderRoute);
+app.use("/dashboard",dashboardRoute)
 
 export default app;
