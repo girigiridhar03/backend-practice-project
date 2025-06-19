@@ -260,6 +260,111 @@ const gettopSellingProducts = async (req, res) => {
   }
 };
 
+const totalOrdersPerUsers = async (req, res) => {
+  try {
+    const totalOrderPerUser = await Order.aggregate([
+      {
+        $group: {
+          _id: "$userid",
+          totalOrders: { $sum: 1 },
+        },
+      },
+      {
+        $lookup: {
+          from: "auths",
+          localField: "_id",
+          foreignField: "_id",
+          as: "userDetails",
+        },
+      },
+      {
+        $unwind: "$userDetails",
+      },
+      {
+        $project: {
+          _id: 0,
+          userId: "$_id",
+          name: "$userDetails.username",
+          email: "$userDetails.email",
+          totalOrders: 1,
+        },
+      },
+      {
+        $sort: {
+          totalOrders: -1,
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      success: true,
+      statusCode: 200,
+      message: "TotalOrderPerUser fetched successfully.",
+      data: totalOrderPerUser,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      statusCode: 500,
+      message: error.message || "Internal Server Error",
+    });
+  }
+};
+
+const getDeliveryAgentOrdersCount = async (req, res) => {
+  try {
+    const deliveryAgentOrdersCount = await Order.aggregate([
+      { $match: { deliveryAgent: { $ne: null } } },
+      {
+        $group: {
+          _id: "$deliveryAgent",
+          totalAssignedOrders: {
+            $sum: 1,
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "auths",
+          localField: "_id",
+          foreignField: "_id",
+          as: "userDetails",
+        },
+      },
+      {
+        $unwind: "$userDetails",
+      },
+      {
+        $project: {
+          _id: 0,
+          agentId: "$_id",
+          agentName: "$userDetails.username",
+          agentEmail: "$userDetails.email",
+          totalAssignedOrders: 1,
+        },
+      },
+      {
+        $sort: {
+          totalAssignedOrders: -1,
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      success: true,
+      statusCode: 200,
+      message: "Total Agent Orders Count Fetched Successfully.",
+      data: deliveryAgentOrdersCount,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      statusCode: 500,
+      message: error.message || "Internal Server Error",
+    });
+  }
+};
+
 export {
   productBrandsOnStock,
   averagePricePerCategory,
@@ -267,4 +372,6 @@ export {
   orderStatus,
   getOrderCountsByLocations,
   gettopSellingProducts,
+  totalOrdersPerUsers,
+  getDeliveryAgentOrdersCount,
 };
