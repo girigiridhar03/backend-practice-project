@@ -1,5 +1,6 @@
 import Order from "../models/order.model.js";
 import Product from "../models/product.model.js";
+import { Auth } from "../models/user.model.js";
 
 const productBrandsOnStock = async (req, res) => {
   try {
@@ -365,6 +366,57 @@ const getDeliveryAgentOrdersCount = async (req, res) => {
   }
 };
 
+const userRolePercentage = async (req, res) => {
+  try {
+    const users = await Auth.aggregate([
+      {
+        $group: {
+          _id: "$role",
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$count" },
+          roles: { $push: { role: "$_id", count: "$count" } },
+        },
+      },
+      {
+        $unwind: "$roles",
+      },
+      {
+        $project: {
+          _id: 0,
+          role: "$roles.role",
+          count: "$roles.count",
+          percentage: {
+            $round: [
+              {
+                $multiply: [{ $divide: ["$roles.count", "$total"] }, 100],
+              },
+              2,
+            ],
+          },
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      success: true,
+      statusCode: 200,
+      message: "User role percentage fetched successfully",
+      data: users,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      statusCode: 500,
+      message: error.message || "Internal Server Error",
+    });
+  }
+};
+
 export {
   productBrandsOnStock,
   averagePricePerCategory,
@@ -374,4 +426,5 @@ export {
   gettopSellingProducts,
   totalOrdersPerUsers,
   getDeliveryAgentOrdersCount,
+  userRolePercentage,
 };

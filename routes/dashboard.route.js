@@ -10,6 +10,7 @@ import {
   productBrandsOnStock,
   totalInStock,
   totalOrdersPerUsers,
+  userRolePercentage,
 } from "../controllers/dashboard.controller.js";
 
 const dashboardRoute = express.Router();
@@ -51,6 +52,12 @@ dashboardRoute.get(
   authMiddleware,
   isAdmin,
   getDeliveryAgentOrdersCount
+);
+dashboardRoute.get(
+  "/userrolescount",
+  authMiddleware,
+  isAdmin,
+  userRolePercentage
 );
 
 export default dashboardRoute;
