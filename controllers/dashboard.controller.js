@@ -417,6 +417,61 @@ const userRolePercentage = async (req, res) => {
   }
 };
 
+const totalOrdersAndPercentage = async (req, res) => {
+  try {
+    const result = await Order.aggregate([
+      {
+        $group: {
+          _id: "$_id",
+          totalOrders: {
+            $sum: 1,
+          },
+          deliveredOrders: {
+            $sum: {
+              $cond: [{ $eq: ["$status", "delivered"] }, 1, 0],
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          totalOrders: 1,
+          deliveredOrders : 1,
+          totalOrdersPercentage: {
+            $round: [
+              {
+                $multiply: [
+                  { $divide: ["$deliveredOrders", "$totalOrders"] },
+                  100,
+                ],
+              },
+              2,
+            ],
+          },
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      success: true,
+      statusCode: 200,
+      message: "Delivered order percentage fetched successfully",
+      data: result[0] || {
+        totalOrders: 0,
+        deliveredOrders: 0,
+        deliveredPercentage: 0,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      statusCode: 500,
+      message: error.message || "Internal Server Error",
+    });
+  }
+};
+
 export {
   productBrandsOnStock,
   averagePricePerCategory,
@@ -427,4 +482,5 @@ export {
   totalOrdersPerUsers,
   getDeliveryAgentOrdersCount,
   userRolePercentage,
+  totalOrdersAndPercentage
 };

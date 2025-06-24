@@ -9,6 +9,7 @@ import {
   orderStatus,
   productBrandsOnStock,
   totalInStock,
+  totalOrdersAndPercentage,
   totalOrdersPerUsers,
   userRolePercentage,
 } from "../controllers/dashboard.controller.js";
@@ -59,5 +60,10 @@ dashboardRoute.get(
   isAdmin,
   userRolePercentage
 );
-
+dashboardRoute.get(
+  "/totalDeliveryordersandPercentage",
+  authMiddleware,
+  isAdmin,
+  totalOrdersAndPercentage
+);
 export default dashboardRoute;
