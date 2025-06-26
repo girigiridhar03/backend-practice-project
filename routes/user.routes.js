@@ -1,6 +1,7 @@
 import express from "express";
 import { upload } from "../middleware/multer.js";
 import {
+  adminLogin,
   createAuthUser,
   deleteAccount,
   deleteProfileImage,
@@ -18,6 +19,7 @@ const userroute = express.Router();
 
 userroute.post("/signup", upload.single("image"), registration);
 userroute.post("/login", login);
+userroute.post("/admin-login", adminLogin);
 userroute.post("/logout", authMiddleware, logout);
 userroute.post(
   "/admin/createRole",

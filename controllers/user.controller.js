@@ -154,6 +154,82 @@ const login = async (req, res) => {
   }
 };
 
+const adminLogin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(200).json({
+        success: false,
+        statusCode: 400,
+        message: "All fields are required",
+      });
+    }
+
+    const user = await Auth.findOne({ email });
+
+    const passwordCheck = await user.isPassword(password);
+
+    if (!passwordCheck) {
+      return res.status(409).json({
+        success: false,
+        statusCode: 409,
+        message: "Invalid Credentials",
+      });
+    }
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        statusCode: 404,
+        message: "User not found.",
+      });
+    }
+
+    if (user?.role !== "admin") {
+      return res.status(400).json({
+        success: false,
+        statusCode: 400,
+        message: "Access denied. Admin only",
+      });
+    }
+
+    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
+      user?._id
+    );
+
+    const loggedInAdmin = await Auth.findById(user?._id).select(
+      "-password -refreshToken"
+    );
+
+    const options = {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    };
+
+    res
+      .status(200)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", refreshToken, options)
+      .json({
+        success: true,
+        statusCode: 200,
+        message: `${loggedInAdmin.role} logged in successfully`,
+        data: loggedInAdmin,
+        accessToken,
+      });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      statusCode: 500,
+      message: error.message || "Internal Server Error",
+    });
+  }
+};
+
 const logout = async (req, res) => {
   try {
     const user = await Auth.findById(req.user?._id);
@@ -474,6 +550,7 @@ const generateNewAccessToken = async (req, res) => {
 export {
   registration,
   login,
+  adminLogin,
   logout,
   createAuthUser,
   deleteProfileImage,
