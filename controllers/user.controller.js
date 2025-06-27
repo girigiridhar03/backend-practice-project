@@ -478,7 +478,10 @@ const getallUsersAndAgents = async (req, res) => {
     const totalAuthUsers = await Auth.countDocuments(query);
     const totalPages = Math.ceil(totalAuthUsers / limit);
 
-    const allAuthUsers = await Auth.find(query).skip(skip).limit(limit);
+    const allAuthUsers = await Auth.find(query)
+      .populate(cartItems.productId)
+      .skip(skip)
+      .limit(limit);
 
     res.status(200).json({
       success: false,
