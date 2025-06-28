@@ -2,6 +2,18 @@ import mongoose from "mongoose";
 import Order from "../models/order.model.js";
 import { Auth } from "../models/user.model.js";
 import Product from "../models/product.model.js";
+import Counter from "../models/Counter.model.js";
+
+const generateOrderId = async () => {
+  const counter = await Counter.findOneAndUpdate(
+    { name: "order" },
+    { $inc: { seq: 1 } },
+    { new: true, upsert: true }
+  );
+
+  const paddedSeq = String(counter.seq).padStart(4, "0");
+  return `ORD${paddedSeq}`;
+};
 
 const postOrderDetails = async (req, res) => {
   try {
@@ -62,6 +74,7 @@ const postOrderDetails = async (req, res) => {
     await user.save();
 
     const newOrder = await Order.create({
+      orderId: await generateOrderId(),
       products,
       userid,
       totalPrice,
