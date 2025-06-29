@@ -149,7 +149,56 @@ const getAllOrders = async (req, res) => {
     });
   }
 };
+const getSingleOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
 
+    if (!id) {
+      return res.status(401).json({
+        success: false,
+        statusCode: 401,
+        message: "Order id is required.",
+      });
+    }
+
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(401).json({
+        success: false,
+        statusCode: 401,
+        message: "Order id is invaild.",
+      });
+    }
+
+    const singleOrder = await Order.findById(id)
+      .populate(
+        "products.productId",
+        "name price rating brand category variant color productImages"
+      )
+      .populate("userid", "username email")
+      .populate("deliveryAgent", "username email image");
+
+    if (!singleOrder) {
+      return res.status(404).json({
+        success: false,
+        statusCode: 404,
+        message: "Order not found.",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      statusCode: 200,
+      message: "Single Order fetched",
+      data: singleOrder,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      statusCode: 500,
+      message: error.message || "Internal Server Error",
+    });
+  }
+};
 const statusUpdate = async (req, res) => {
   try {
     const { orderId } = req.params;
@@ -344,4 +393,5 @@ export {
   assignOrderToAgent,
   agentAssignedOrders,
   getUserOrders,
+  getSingleOrder,
 };

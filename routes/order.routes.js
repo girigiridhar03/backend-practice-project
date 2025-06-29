@@ -3,6 +3,7 @@ import {
   agentAssignedOrders,
   assignOrderToAgent,
   getAllOrders,
+  getSingleOrder,
   getUserOrders,
   postOrderDetails,
   statusUpdate,
@@ -29,4 +30,5 @@ orderRoute.get(
   agentAssignedOrders
 );
 orderRoute.get("/getuserorderDetails", authMiddleware, getUserOrders);
+orderRoute.get("/getsingleorder/:id", authMiddleware, isAdmin, getSingleOrder);
 export default orderRoute;
