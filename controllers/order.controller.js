@@ -174,7 +174,7 @@ const getSingleOrder = async (req, res) => {
         "products.productId",
         "name price rating brand category variant color productImages"
       )
-      .populate("userid", "username email")
+      .populate("userid", "username email image")
       .populate("deliveryAgent", "username email image");
 
     if (!singleOrder) {
