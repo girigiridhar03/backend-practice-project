@@ -130,7 +130,7 @@ const getAllOrders = async (req, res) => {
         "name price rating brand category variant color productImages"
       )
       .populate("userid", "username email")
-      .populate("deliveryAgent", "username email");
+      .populate("deliveryAgent", "username email image");
 
     res.status(200).json({
       success: true,
