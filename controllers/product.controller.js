@@ -298,15 +298,17 @@ const updateCart = async (req, res) => {
 
     existingItem.quantity = quantity;
 
-    user.cartItems = user.cartItems.map((item)=> item?.productId.toString() === productId ? existingItem : item);
+    user.cartItems = user.cartItems.map((item) =>
+      item?.productId.toString() === productId ? existingItem : item
+    );
 
     await user.save();
     res.status(200).json({
-      success : true,
-      statusCode : 200,
-      message : "Cart Updated",
-      data : user.cartItems
-    })
+      success: true,
+      statusCode: 200,
+      message: "Cart Updated",
+      data: user.cartItems,
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -477,7 +479,10 @@ const getSingleProduct = async (req, res) => {
       });
     }
 
-    const product = await Product.findById(productId);
+    const product = await Product.findById(productId).populate(
+      "comments.user",
+      "username email image"
+    );
 
     if (!product) {
       return res.status(404).json({
@@ -555,8 +560,6 @@ const addComments = async (req, res) => {
 
     product.comments.push({
       user: userId,
-      name: existingUser?.username,
-      userimage: existingUser?.image?.url,
       comment,
     });
 

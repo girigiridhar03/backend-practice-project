@@ -60,14 +60,8 @@ const productSchema = new mongoose.Schema(
           type: mongoose.Schema.Types.ObjectId,
           ref: "Auth",
         },
-        name: {
-          type: String,
-        },
         comment: {
           type: String,
-        },
-        userimage : {
-          type : String
         },
         date: {
           type: Date,
