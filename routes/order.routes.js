@@ -10,7 +10,7 @@ import {
 } from "../controllers/order.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 import isAdmin from "../middleware/isAdmin.middleware.js";
-import isAgentMiddleware from "../middleware/isAgent.middleware.js";
+import isAgentAndAdminMiddleware from "../middleware/isAgent.middleware.js";
 
 const orderRoute = express.Router();
 
@@ -26,7 +26,7 @@ orderRoute.post(
 orderRoute.get(
   "/agentorders",
   authMiddleware,
-  isAgentMiddleware,
+  isAgentAndAdminMiddleware,
   agentAssignedOrders
 );
 orderRoute.get("/getuserorderDetails", authMiddleware, getUserOrders);

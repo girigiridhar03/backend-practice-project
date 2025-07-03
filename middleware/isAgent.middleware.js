@@ -1,14 +1,14 @@
 import { Auth } from "../models/user.model.js";
 
-const isAgentMiddleware = async (req, res, next) => {
+const isAgentAndAdminMiddleware = async (req, res, next) => {
   try {
     const user = await Auth.findById(req.user?._id);
 
-    if (!user || user.role !== "agent") {
+    if (!user || (user.role !== "agent" && user.role !== "admin")) {
       return res.status(403).json({
         success: false,
         statusCode: 403,
-        message: "Access denied. Agent only",
+        message: "Access denied. Only agents or admins allowed.",
       });
     }
 
@@ -22,4 +22,4 @@ const isAgentMiddleware = async (req, res, next) => {
   }
 };
 
-export default isAgentMiddleware;
+export default isAgentAndAdminMiddleware;

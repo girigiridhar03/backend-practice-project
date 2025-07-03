@@ -334,9 +334,17 @@ const assignOrderToAgent = async (req, res) => {
 
 const agentAssignedOrders = async (req, res) => {
   try {
-    const agentid = req.user?._id;
+    const agentid = req.query.agentid || req.user?._id;
 
-    const agentdeliveryOrders = await Order.find({ deliveryAgent: agentid });
+      if (!mongoose.Types.ObjectId.isValid(agentid)) {
+      return res.status(400).json({
+        success: false,
+        statusCode: 400,
+        message: "Invalid agent ID.",
+      });
+    }
+
+    const agentdeliveryOrders = await Order.find({ deliveryAgent: agentid }).populate("deliveryAgent","username email image role");
 
     if (agentdeliveryOrders.length === 0) {
       return res.status(200).json({
