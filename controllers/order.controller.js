@@ -344,7 +344,7 @@ const agentAssignedOrders = async (req, res) => {
       });
     }
 
-    const agentdeliveryOrders = await Order.find({ deliveryAgent: agentid }).populate("deliveryAgent","username email image role");
+    const agentdeliveryOrders = await Order.findOne({ deliveryAgent: agentid }).populate("deliveryAgent","username email image role");
 
     if (agentdeliveryOrders.length === 0) {
       return res.status(200).json({
