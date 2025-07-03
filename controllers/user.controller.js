@@ -5,6 +5,7 @@ import {
   deleteFileInCloudinary,
   uploadToCloudinary,
 } from "../utils/cloudinary.js";
+import mongoose from "mongoose";
 
 const generateAccessAndRefreshTokens = async (id) => {
   try {
@@ -550,6 +551,46 @@ const generateNewAccessToken = async (req, res) => {
   }
 };
 
+const getSingleUser = async(req,res) =>{
+  try {
+    
+    const {userid} = req.params;
+    
+    if(!mongoose.Types.ObjectId.isValid(userid)){
+      return res.status(400).json({
+         success : false,
+         statusCode : 400,
+         message : "Invalid id",
+      })
+    }
+
+    const authUser = await Auth.findById(userid).select("-password -refreshToken");
+
+    if(!authUser){
+      return res.status(404).json({
+        success : false,
+        statusCode : 404,
+        message : "User not found"
+      })
+    }
+
+    res.status(200).json({
+      success : true,
+      statuCode : 200,
+      message : "Single user found.",
+      data : authUser
+    })
+
+
+  } catch (error) {
+     res.status(500).json({
+      success: false,
+      statusCode: 500,
+      message: error.message || "Internal Server Error",
+    });
+  }
+}
+
 export {
   registration,
   login,
@@ -561,4 +602,5 @@ export {
   deleteAccount,
   getallUsersAndAgents,
   generateNewAccessToken,
+  getSingleUser
 };
