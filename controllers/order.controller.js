@@ -344,7 +344,7 @@ const agentAssignedOrders = async (req, res) => {
       });
     }
 
-    const agentdeliveryOrders = await Order.findOne({ deliveryAgent: agentid })
+    const agentdeliveryOrders = await Order.find({ deliveryAgent: agentid })
       .populate("deliveryAgent", "username email image role")
       .populate("userid", "username email image");
 
@@ -357,11 +357,22 @@ const agentAssignedOrders = async (req, res) => {
       });
     }
 
+    const agent = agentdeliveryOrders[0].deliveryAgent;
+
+    const orders = agentdeliveryOrders.map((order) => {
+      const orderObj = order.toObject();
+      delete orderObj.deliveryAgent;
+      return orderObj;
+    });
+
     res.status(200).json({
       success: true,
       statusCode: 200,
       message: "Orders retrieved.",
-      data: agentdeliveryOrders,
+      data: {
+        agent,
+        orders,
+      },
     });
   } catch (error) {
     res.status(500).json({
