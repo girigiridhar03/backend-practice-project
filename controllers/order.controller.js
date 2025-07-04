@@ -336,7 +336,7 @@ const agentAssignedOrders = async (req, res) => {
   try {
     const agentid = req.query.agentid || req.user?._id;
 
-      if (!mongoose.Types.ObjectId.isValid(agentid)) {
+    if (!mongoose.Types.ObjectId.isValid(agentid)) {
       return res.status(400).json({
         success: false,
         statusCode: 400,
@@ -344,7 +344,9 @@ const agentAssignedOrders = async (req, res) => {
       });
     }
 
-    const agentdeliveryOrders = await Order.findOne({ deliveryAgent: agentid }).populate("deliveryAgent","username email image role");
+    const agentdeliveryOrders = await Order.findOne({ deliveryAgent: agentid })
+      .populate("deliveryAgent", "username email image role")
+      .populate("userid", "username email image");
 
     if (agentdeliveryOrders.length === 0) {
       return res.status(200).json({
