@@ -241,6 +241,7 @@ const addToCart = async (req, res) => {
         description: product?.description,
         color: product?.color,
         variant: product?.variant,
+        category: product?.category,
       });
     }
 

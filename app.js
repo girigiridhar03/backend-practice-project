@@ -32,10 +32,12 @@ import userroute from "./routes/user.routes.js";
 import productroute from "./routes/product.routes.js";
 import orderRoute from "./routes/order.routes.js";
 import dashboardRoute from "./routes/dashboard.route.js";
+import homeroute from "./routes/home.routes.js";
 
 app.use("/auth", userroute);
 app.use("/store", productroute);
 app.use("/order", orderRoute);
-app.use("/dashboard",dashboardRoute)
+app.use("/dashboard",dashboardRoute);
+app.use("/",homeroute)
 
 export default app;

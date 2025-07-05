@@ -60,6 +60,9 @@ const authSchema = new mongoose.Schema(
           price: {
             type: Number,
           },
+          category : {
+            type : String
+          }
         },
       ],
       default: undefined,
