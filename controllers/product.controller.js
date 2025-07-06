@@ -121,17 +121,19 @@ const editProduct = async (req, res) => {
 
     const files = req.files;
 
-    let productImages = product.productImages;
+    let productImages = [...product.productImages];
 
     if (files && files.length > 0) {
       const imageUploadResult = await Promise.all(
         files.map((image) => uploadToCloudinary(image?.path))
       );
 
-      productImages = imageUploadResult.map((img) => ({
+      let newImages = imageUploadResult.map((img) => ({
         url: img.url,
         publicId: img.public_id,
       }));
+
+      productImages = [...productImages, ...newImages];
     }
 
     const updatedProduct = await Product.findByIdAndUpdate(
