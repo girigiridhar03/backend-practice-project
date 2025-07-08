@@ -120,12 +120,19 @@ const editProduct = async (req, res) => {
       variant,
       color,
       section,
-      deletedImages,
     } = req.body;
 
     const files = req.files;
 
     let productImages = product.productImages;
+
+    let deletedImages = [];
+    if (req.body["deletedImages[]"]) {
+      const raw = req.body["deletedImages[]"];
+      deletedImages = Array.isArray(raw)
+        ? raw.map((item) => JSON.parse(item))
+        : [JSON.parse(raw)];
+    }
 
     if (deletedImages?.length > 0) {
       productImages = product.productImages.filter(
