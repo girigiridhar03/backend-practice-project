@@ -124,7 +124,14 @@ const editProduct = async (req, res) => {
 
     const files = req.files;
 
-    let productImages = product.productImages;
+    let productImages;
+
+    if (req.body.productImages) {
+      const raw = req.body.productImages;
+      productImages = Array.isArray(raw)
+        ? raw.map((item) => JSON.parse(item))
+        : [JSON.parse(raw)];
+    }
 
     let deletedImages = [];
     if (req.body["deletedImages[]"]) {
