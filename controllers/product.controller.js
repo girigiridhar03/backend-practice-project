@@ -1,6 +1,9 @@
 import mongoose from "mongoose";
 import Product from "../models/product.model.js";
-import { uploadToCloudinary } from "../utils/cloudinary.js";
+import {
+  deleteFileInCloudinary,
+  uploadToCloudinary,
+} from "../utils/cloudinary.js";
 import { Auth } from "../models/user.model.js";
 
 const addProduct = async (req, res) => {
@@ -117,11 +120,25 @@ const editProduct = async (req, res) => {
       variant,
       color,
       section,
+      deletedImages,
     } = req.body;
 
     const files = req.files;
 
-    let productImages = [...product.productImages];
+    let productImages = product.productImages;
+
+    if (deletedImages?.length > 0) {
+      productImages = product.productImages.filter(
+        (item1) =>
+          !deletedImages.some((item2) => item2.publicId === item1.publicId)
+      );
+    }
+
+    if (deletedImages?.length > 0) {
+      await Promise.all(
+        deletedImages.map((item) => deleteFileInCloudinary(item?.publicId))
+      );
+    }
 
     if (files && files.length > 0) {
       const imageUploadResult = await Promise.all(
