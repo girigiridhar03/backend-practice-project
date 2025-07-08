@@ -102,8 +102,6 @@ const topFiveProducts = async (req, res) => {
   try {
     const { section } = req.query;
 
-    console.log(section)
-
     if (!section) {
       return res.status(401).json({
         success: false,

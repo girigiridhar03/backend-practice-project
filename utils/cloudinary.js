@@ -19,14 +19,11 @@ const uploadToCloudinary = async (localFilePath) => {
       folder: "ecommerce/products",
     });
 
-    console.log("file uploaded successfully", response);
-
     fs.promises.unlink(localFilePath).catch(console.error);
 
     return response;
   } catch (error) {
     fs.promises.unlink(localFilePath).catch(console.error);
-    console.log("file upload failed ", error);
     return null;
   }
 };
@@ -35,10 +32,8 @@ const deleteFileInCloudinary = async (publicId) => {
   try {
     if (!publicId) return null;
     const result = await cloudinary.uploader.destroy(publicId);
-    console.log("Cloudinary delete result:", result.result);
     return result;
   } catch (error) {
-    console.log("file delete failed", error);
     return null;
   }
 };
