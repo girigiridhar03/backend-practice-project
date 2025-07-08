@@ -125,6 +125,16 @@ const editProduct = async (req, res) => {
     const files = req.files;
 
     let productImages = product.productImages;
+    if (req.body.productImages) {
+      try {
+        const parsed = JSON.parse(req.body.productImages);
+        if (Array.isArray(parsed)) {
+          productImages = parsed;
+        }
+      } catch (err) {
+        console.error("Invalid productImages JSON");
+      }
+    }
 
     let deletedImages = [];
     if (req.body["deletedImages[]"]) {
