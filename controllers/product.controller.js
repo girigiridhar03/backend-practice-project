@@ -443,12 +443,10 @@ const getAllProducts = async (req, res) => {
     const userid = req.user?._id;
 
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 5;
+    const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
     const sortBy = req.query.sortBy || "createdAt";
     const sortOrder = req.query.sortOrder === "asc" ? 1 : -1;
-    const totalProducts = await Product.countDocuments();
-    const totalPages = Math.ceil(totalProducts / limit);
 
     const query = {};
 
@@ -467,6 +465,10 @@ const getAllProducts = async (req, res) => {
     if (category) {
       query.category = { $regex: category, $options: "i" };
     }
+
+    const totalProducts = await Product.countDocuments(query);
+
+    const totalPages = Math.ceil(totalProducts / limit);
 
     let allProducts = await Product.find(query)
       .sort({ [sortBy]: sortOrder })

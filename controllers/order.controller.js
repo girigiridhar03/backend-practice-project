@@ -107,9 +107,7 @@ const getAllOrders = async (req, res) => {
   try {
     const { status, location } = req.query;
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 5;
-    const totalOrders = await Order.countDocuments();
-    const totalPages = Math.ceil(totalOrders / limit);
+    const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
     const query = {};
@@ -121,6 +119,9 @@ const getAllOrders = async (req, res) => {
     if (location) {
       query.location = location;
     }
+
+    const totalOrders = await Order.countDocuments(query);
+    const totalPages = Math.ceil(totalOrders / limit);
 
     const allOrders = await Order.find(query)
       .skip(skip)
