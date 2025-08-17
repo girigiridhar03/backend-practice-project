@@ -200,7 +200,7 @@ const adminLogin = async (req, res) => {
     );
 
     const loggedInAdmin = await Auth.findById(user?._id).select(
-      "-password -refreshToken"
+      "-password -refreshToken -cartItems"
     );
 
     const options = {

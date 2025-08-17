@@ -26,8 +26,8 @@ userroute.post(
   "/admin/createRole",
   upload.single("image"),
   authMiddleware,
-  isAdmin,
-  createAuthUser
+    isAdmin,
+    createAuthUser
 );
 userroute.post("/deleteprofileimage", authMiddleware, deleteProfileImage);
 userroute.put(

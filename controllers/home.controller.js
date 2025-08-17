@@ -6,7 +6,7 @@ const latestProduct = async (req, res) => {
   try {
     const lateshProducts = await Product.find({})
       .sort({ createdAt: -1 })
-      .limit(5);
+      .limit(4);
 
     if (lateshProducts?.length === 0) {
       return res.status(200).json({
@@ -98,23 +98,23 @@ const addLandingPageImages = async (req, res) => {
   }
 };
 
-const topFiveProducts = async (req, res) => {
+const topFourProducts = async (req, res) => {
   try {
     const { section } = req.query;
 
     if (!section) {
-      return res.status(401).json({
+      return res.status(400).json({
         success: false,
-        statusCode: 401,
-        message: "Category is rquired.",
+        statusCode: 400,
+        message: "Category is required.",
       });
     }
 
     const topFive = await Product.find({ section: section })
-      .sort({ createdAt: -1 })
-      .limit(5);
+      .sort({ createdAt: -1, price: 1 })
+      .limit(4);
 
-    if (!topFive || !topFive?.length === 0) {
+    if (!topFive || topFive?.length !== 0) {
       return res.status(200).json({
         success: true,
         statusCode: 200,
@@ -142,5 +142,5 @@ export {
   latestProduct,
   addLandingPageImages,
   landingPageImages,
-  topFiveProducts,
+  topFourProducts,
 };

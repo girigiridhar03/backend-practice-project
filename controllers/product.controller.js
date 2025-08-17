@@ -768,6 +768,27 @@ const getProductsByGroupId = async (req, res) => {
   }
 };
 
+const getCartCounts = async (req, res) => {
+  try {
+    const userid = req.user?._id;
+
+    const cartDetails = await Auth.findById(userid);
+
+    res.status(200).json({
+      success: true,
+      statusCode: 200,
+      message: "Successfully cart count fetched",
+      count: cartDetails?.cartItems?.length,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      statusCode: 500,
+      message: error.message || "Internal Server Error",
+    });
+  }
+};
+
 export {
   addProduct,
   getAllProducts,
@@ -782,4 +803,5 @@ export {
   deleteComment,
   getCategoriesAndCount,
   getProductsByGroupId,
+  getCartCounts,
 };

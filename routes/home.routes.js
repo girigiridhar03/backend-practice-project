@@ -4,7 +4,7 @@ import {
   addLandingPageImages,
   landingPageImages,
   latestProduct,
-  topFiveProducts,
+  topFourProducts,
 } from "../controllers/home.controller.js";
 import isAdmin from "../middleware/isAdmin.middleware.js";
 import { upload } from "../middleware/multer.js";
@@ -20,6 +20,6 @@ homeroute.post(
   addLandingPageImages
 );
 homeroute.get("/getlandingimages", authMiddleware, landingPageImages);
-homeroute.get("/topfiveproducts", authMiddleware, topFiveProducts);
+homeroute.get("/topFourProducts", authMiddleware, topFourProducts);
 
 export default homeroute;
